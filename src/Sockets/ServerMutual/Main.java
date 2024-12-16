@@ -32,19 +32,22 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        Sockets.ServerMutual.Client c = new Client(host, port);
+        /* Sockets.ServerMutual.Client c = new Client(host, port);
         if (!c.connect()) {
             System.out.println("ERROR: Can't connect to the server.");
             return;
         }
 
-        c.send(sc.nextLine() + "\n");
+       System.out.println("Escribe el texto a traducir: ");
+        String mensaje = sc.nextLine();
+        System.out.println("¿A qué idioma quieres traducir?");
+        String idioma = sc.next();
 
-        c.send(sc.next() + "\n");
+        c.send(mensaje+"~"+idioma);
 
         String ans = c.receive();
 
-        System.out.println(ans);
+        System.out.println(ans);*/
 
     }
 
