@@ -109,7 +109,7 @@ public class Server implements Runnable {
                     System.out.println("SERVER: Message received: " + clientMessage);
                     String translatedMessage = getAnswer(clientMessage, clientLanguage);
                     //System.out.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
-                    pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + getAnswer(clientMessage, clientLanguage));
+                    pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
                     System.out.println("SERVER: Message sent.");
                     pw.close();
 
