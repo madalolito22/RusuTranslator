@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Client {
 
@@ -14,6 +15,7 @@ public class Client {
     private Socket socket = null;
     private InputStreamReader isr = null;
     private BufferedReader bfr = null;
+    static Scanner sc = new Scanner(System.in);
 
     public Client(String host, int port) {
         this.host = host;
@@ -36,6 +38,10 @@ public class Client {
             isr = new InputStreamReader(socket.getInputStream());
             bfr = new BufferedReader(isr);
             String ans = bfr.readLine();
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                ans += line + "\n"; // Acumulamos varias líneas
+            }
             System.out.println("CLIENT: Message received.");
             bfr.close();
             isr.close();
@@ -59,4 +65,16 @@ public class Client {
         }
     }
 
+    public String formMessage() {
+
+        System.out.println("Escribe el texto a traducir: ");
+        String mensaje = sc.nextLine();
+
+        System.out.println("¿A qué idioma quieres traducir?");
+        String idioma = sc.next();
+
+
+        return mensaje+"~"+idioma;
+
+    }
 }

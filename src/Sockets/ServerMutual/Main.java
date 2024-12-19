@@ -14,17 +14,14 @@ import java.util.Scanner;
 
 public class Main {
 
-    static Scanner sc = new Scanner(System.in);
-
     //private static final String host = "192.168.67.181";
     private static final String host = "localhost";
     private static final int port = 1347;
+    static Sockets.ServerMutual.Server server = new Server(port);
 
     public static void main(String[] args) {
 
-        Sockets.ServerMutual.Server s = new Server(port);
-
-        Thread serverThread = new Thread(s);
+        Thread serverThread = new Thread(server);
         serverThread.start();
         try {
             Thread.sleep(1000);
@@ -32,26 +29,19 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        /* Sockets.ServerMutual.Client c = new Client(host, port);
+        Sockets.ServerMutual.Client c = new Client(host, port);
         if (!c.connect()) {
             System.out.println("ERROR: Can't connect to the server.");
             return;
         }
 
-       System.out.println("Escribe el texto a traducir: ");
-        String mensaje = sc.nextLine();
-        System.out.println("¿A qué idioma quieres traducir?");
-        String idioma = sc.next();
-
-        c.send(mensaje+"~"+idioma);
+        c.send(c.formMessage());
 
         String ans = c.receive();
 
-        System.out.println(ans);*/
+        System.out.println(ans);
 
     }
-
-
 
 }
 

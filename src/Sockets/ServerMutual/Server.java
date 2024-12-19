@@ -6,9 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 public class Server implements Runnable {
 
@@ -19,11 +17,14 @@ public class Server implements Runnable {
     ArrayList<String> sends;
     String clientMessage = "";
     String clientLanguage = "";
-    HashMap<String, Integer> idiomasDisponibles = new HashMap<>();
+    Integer clientLanguageNum = 0;
+    LinkedHashMap<Integer, String> idiomasDisponibles = new LinkedHashMap<>();
+    LinkedHashMap<String, String> idiomasAcortaciones = new LinkedHashMap<>();
     boolean gettingMessage = true;
     boolean gettingLng = false;
     private Socket client = null;
     private ServerSocket server = null;
+    PrintWriter pw;
 
 
     public Server(int port) {
@@ -31,11 +32,7 @@ public class Server implements Runnable {
     }
 
     private static String translate(String langFrom, String langTo, String text) throws IOException {
-
-        String urlStr = "https://script.google.com/macros/s/AKfycbxq5SL1XmfVK05ph1l4uu9u4LXQeCno5fmNdpval10rraJ-YJOsSeSzl9HzRJGlI_gp/exec" +
-                "?q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) +
-                "&target=" + langTo +
-                "&source=" + langFrom;
+        String urlStr = "https://script.google.com/macros/s/AKfycbxq5SL1XmfVK05ph1l4uu9u4LXQeCno5fmNdpval10rraJ-YJOsSeSzl9HzRJGlI_gp/exec" + "?q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) + "&target=" + langTo + "&source=" + langFrom;
         URL url = new URL(urlStr);
         StringBuilder response = new StringBuilder();
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -52,9 +49,7 @@ public class Server implements Runnable {
     @Override
     public void run() {
         try {
-
             hashmapIdiomas();
-
             InputStreamReader isr = null;
             BufferedReader reader = null;
             PrintWriter pw = null;
@@ -68,55 +63,53 @@ public class Server implements Runnable {
             }
 
             while (true) {
-
                 client = server.accept();
                 System.out.println("SERVER: Connection established!");
 
-                pw = new PrintWriter(client.getOutputStream(), true);
-
                 isr = new InputStreamReader(client.getInputStream());
                 reader = new BufferedReader(isr);
+                pw = new PrintWriter(client.getOutputStream(), true);
+
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                printPossibleLanguages(pw);
 
                 String all = reader.readLine();
+                System.out.println(all);
 
                 for (int i = 0; i < all.length(); i++) {
-
                     Character charnow = all.charAt(i);
 
                     if (!charnow.equals('~') && gettingMessage) {
-
                         clientMessage += charnow.toString();
-
                     } else if (gettingLng) {
-
-                        clientLanguage = clientLanguage.concat(charnow.toString());
+                        clientLanguageNum = Integer.valueOf(clientLanguageNum.toString().concat(String.valueOf(Integer.parseInt(charnow.toString()))));
+                        clientLanguage = idiomasDisponibles.get(clientLanguageNum);
+                        System.out.println(clientLanguageNum);
+                        System.out.println(clientLanguage);
+                        System.out.println(clientMessage);
 
                         if ((clientMessage.length() + clientLanguage.length()) - 1 == all.length()) {
                             gettingLng = false;
                             break;
                         }
-
                     } else if (charnow.equals('~')) {
-
                         gettingMessage = false;
                         gettingLng = true;
-
                     }
                 }
 
-                if (clientMessage != null && clientLanguage != null) {
-
+                if (clientMessage != null && clientLanguage != null && idiomasDisponibles.containsKey(clientLanguageNum)) {
                     System.out.println("SERVER: Message received: " + clientMessage);
                     String translatedMessage = getAnswer(clientMessage, clientLanguage);
-                    //System.out.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
                     pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
                     System.out.println("SERVER: Message sent.");
-                    pw.close();
-
                 } else {
-
-                    System.out.println("ERROR: No message received from client.");
-
+                    System.out.println("ERROR: No message received from client OR language received not found.");
                 }
 
                 reader.close();
@@ -132,77 +125,160 @@ public class Server implements Runnable {
         return translate("", destination, message);
     }
 
-    public HashMap<String, Integer> hashmapIdiomas() {
-
-        idiomasDisponibles.put("af", 1);
-        idiomasDisponibles.put("sq", 2);
-        idiomasDisponibles.put("am", 3);
-        idiomasDisponibles.put("ar", 4);
-        idiomasDisponibles.put("eu", 5);
-        idiomasDisponibles.put("bn", 6);
-        idiomasDisponibles.put("bs", 7);
-        idiomasDisponibles.put("bg", 8);
-        idiomasDisponibles.put("zh-HK", 9);
-        idiomasDisponibles.put("ca", 10);
-        idiomasDisponibles.put("zh-CN", 11);
-        idiomasDisponibles.put("zh-TW", 12);
-        idiomasDisponibles.put("hr", 13);
-        idiomasDisponibles.put("cs", 14);
-        idiomasDisponibles.put("da", 15);
-        idiomasDisponibles.put("nl", 16);
-        idiomasDisponibles.put("en", 17);
-        idiomasDisponibles.put("et", 18);
-        idiomasDisponibles.put("tl", 19);
-        idiomasDisponibles.put("fi", 20);
-        idiomasDisponibles.put("fr", 21);
-        idiomasDisponibles.put("gl", 22);
-        idiomasDisponibles.put("de", 23);
-        idiomasDisponibles.put("el", 24);
-        idiomasDisponibles.put("gu", 25);
-        idiomasDisponibles.put("ha", 26);
-        idiomasDisponibles.put("he", 27);
-        idiomasDisponibles.put("hi", 28);
-        idiomasDisponibles.put("hu", 29);
-        idiomasDisponibles.put("is", 30);
-        idiomasDisponibles.put("id", 31);
-        idiomasDisponibles.put("it", 32);
-        idiomasDisponibles.put("ja", 33);
-        idiomasDisponibles.put("jv", 34);
-        idiomasDisponibles.put("kn", 35);
-        idiomasDisponibles.put("km", 36);
-        idiomasDisponibles.put("ko", 37);
-        idiomasDisponibles.put("la", 38);
-        idiomasDisponibles.put("lv", 39);
-        idiomasDisponibles.put("lt", 40);
-        idiomasDisponibles.put("ms", 41);
-        idiomasDisponibles.put("ml", 42);
-        idiomasDisponibles.put("mr", 43);
-        idiomasDisponibles.put("my", 44);
-        idiomasDisponibles.put("ne", 45);
-        idiomasDisponibles.put("no", 46);
-        idiomasDisponibles.put("pl", 47);
-        idiomasDisponibles.put("pt-BR", 48);
-        idiomasDisponibles.put("pt-PT", 49);
-        idiomasDisponibles.put("pa", 50);
-        idiomasDisponibles.put("ro", 51);
-        idiomasDisponibles.put("ru", 52);
-        idiomasDisponibles.put("sr", 53);
-        idiomasDisponibles.put("si", 54);
-        idiomasDisponibles.put("sk", 55);
-        idiomasDisponibles.put("es", 56);
-        idiomasDisponibles.put("su", 57);
-        idiomasDisponibles.put("sw", 58);
-        idiomasDisponibles.put("sv", 59);
-        idiomasDisponibles.put("ta", 60);
-        idiomasDisponibles.put("te", 61);
-        idiomasDisponibles.put("th", 62);
-        idiomasDisponibles.put("tr", 63);
-        idiomasDisponibles.put("uk", 64);
-        idiomasDisponibles.put("ur", 65);
-        idiomasDisponibles.put("vi", 66);
-        idiomasDisponibles.put("cy", 67);
-
-        return idiomasDisponibles;
+    public LinkedHashMap<String, String> hashmapIdiomas() {
+        idiomasAcortaciones.put("Afrikaans", "af");
+        idiomasAcortaciones.put("Albanian", "sq");
+        idiomasAcortaciones.put("Amharic", "am");
+        idiomasAcortaciones.put("Arabic", "ar");
+        idiomasAcortaciones.put("Basque", "eu");
+        idiomasAcortaciones.put("Bengali", "bn");
+        idiomasAcortaciones.put("Bosnian", "bs");
+        idiomasAcortaciones.put("Bulgarian", "bg");
+        idiomasAcortaciones.put("Cantonese", "yue");
+        idiomasAcortaciones.put("Catalan", "ca");
+        idiomasAcortaciones.put("Chinese (Simplified)", "zh-CN");
+        idiomasAcortaciones.put("Chinese (Traditional)", "zh-TW");
+        idiomasAcortaciones.put("Croatian", "hr");
+        idiomasAcortaciones.put("Czech", "cs");
+        idiomasAcortaciones.put("Danish", "da");
+        idiomasAcortaciones.put("Dutch", "nl");
+        idiomasAcortaciones.put("English", "en");
+        idiomasAcortaciones.put("Estonian", "et");
+        idiomasAcortaciones.put("Filipino", "fil");
+        idiomasAcortaciones.put("Finnish", "fi");
+        idiomasAcortaciones.put("French", "fr");
+        idiomasAcortaciones.put("Galician", "gl");
+        idiomasAcortaciones.put("German", "de");
+        idiomasAcortaciones.put("Greek", "el");
+        idiomasAcortaciones.put("Gujarati", "gu");
+        idiomasAcortaciones.put("Hausa", "ha");
+        idiomasAcortaciones.put("Hebrew", "he");
+        idiomasAcortaciones.put("Hindi", "hi");
+        idiomasAcortaciones.put("Hungarian", "hu");
+        idiomasAcortaciones.put("Icelandic", "is");
+        idiomasAcortaciones.put("Indonesian", "id");
+        idiomasAcortaciones.put("Italian", "it");
+        idiomasAcortaciones.put("Japanese", "ja");
+        idiomasAcortaciones.put("Javanese", "jv");
+        idiomasAcortaciones.put("Kannada", "kn");
+        idiomasAcortaciones.put("Khmer", "km");
+        idiomasAcortaciones.put("Korean", "ko");
+        idiomasAcortaciones.put("Latin", "la");
+        idiomasAcortaciones.put("Latvian", "lv");
+        idiomasAcortaciones.put("Lithuanian", "lt");
+        idiomasAcortaciones.put("Malay", "ms");
+        idiomasAcortaciones.put("Malayalam", "ml");
+        idiomasAcortaciones.put("Marathi", "mr");
+        idiomasAcortaciones.put("Myanmar (Burmese)", "my");
+        idiomasAcortaciones.put("Nepali", "ne");
+        idiomasAcortaciones.put("Norwegian (Bokmål)", "no");
+        idiomasAcortaciones.put("Polish", "pl");
+        idiomasAcortaciones.put("Portuguese (Brazil)", "pt-BR");
+        idiomasAcortaciones.put("Portuguese (Portugal)", "pt-PT");
+        idiomasAcortaciones.put("Punjabi (Gurmukhi)", "pa");
+        idiomasAcortaciones.put("Romanian", "ro");
+        idiomasAcortaciones.put("Russian", "ru");
+        idiomasAcortaciones.put("Serbian", "sr");
+        idiomasAcortaciones.put("Sinhala", "si");
+        idiomasAcortaciones.put("Slovak", "sk");
+        idiomasAcortaciones.put("Spanish", "es");
+        idiomasAcortaciones.put("Sundanese", "su");
+        idiomasAcortaciones.put("Swahili", "sw");
+        idiomasAcortaciones.put("Swedish", "sv");
+        idiomasAcortaciones.put("Tamil", "ta");
+        idiomasAcortaciones.put("Telugu", "te");
+        idiomasAcortaciones.put("Thai", "th");
+        idiomasAcortaciones.put("Turkish", "tr");
+        idiomasAcortaciones.put("Ukrainian", "uk");
+        idiomasAcortaciones.put("Urdu", "ur");
+        idiomasAcortaciones.put("Vietnamese", "vi");
+        idiomasAcortaciones.put("Welsh", "cy");
+        return idiomasAcortaciones;
     }
 
+    public void printPossibleLanguages(PrintWriter pw) {
+        idiomasDisponibles.put(1, "af");
+        idiomasDisponibles.put(2, "sq");
+        idiomasDisponibles.put(3, "am");
+        idiomasDisponibles.put(4, "ar");
+        idiomasDisponibles.put(5, "eu");
+        idiomasDisponibles.put(6, "bn");
+        idiomasDisponibles.put(7, "bs");
+        idiomasDisponibles.put(8, "bg");
+        idiomasDisponibles.put(9, "zh-HK");
+        idiomasDisponibles.put(10, "ca");
+        idiomasDisponibles.put(11, "zh-CN");
+        idiomasDisponibles.put(12, "zh-TW");
+        idiomasDisponibles.put(13, "hr");
+        idiomasDisponibles.put(14, "cs");
+        idiomasDisponibles.put(15, "da");
+        idiomasDisponibles.put(16, "nl");
+        idiomasDisponibles.put(17, "en");
+        idiomasDisponibles.put(18, "et");
+        idiomasDisponibles.put(19, "tl");
+        idiomasDisponibles.put(20, "fi");
+        idiomasDisponibles.put(21, "fr");
+        idiomasDisponibles.put(22, "gl");
+        idiomasDisponibles.put(23, "de");
+        idiomasDisponibles.put(24, "el");
+        idiomasDisponibles.put(25, "gu");
+        idiomasDisponibles.put(26, "ha");
+        idiomasDisponibles.put(27, "he");
+        idiomasDisponibles.put(28, "hi");
+        idiomasDisponibles.put(29, "hu");
+        idiomasDisponibles.put(30, "is");
+        idiomasDisponibles.put(31, "id");
+        idiomasDisponibles.put(32, "it");
+        idiomasDisponibles.put(33, "ja");
+        idiomasDisponibles.put(34, "jv");
+        idiomasDisponibles.put(35, "kn");
+        idiomasDisponibles.put(36, "km");
+        idiomasDisponibles.put(37, "ko");
+        idiomasDisponibles.put(38, "la");
+        idiomasDisponibles.put(39, "lv");
+        idiomasDisponibles.put(40, "lt");
+        idiomasDisponibles.put(41, "ms");
+        idiomasDisponibles.put(42, "ml");
+        idiomasDisponibles.put(43, "mr");
+        idiomasDisponibles.put(44, "my");
+        idiomasDisponibles.put(45, "ne");
+        idiomasDisponibles.put(46, "no");
+        idiomasDisponibles.put(47, "pl");
+        idiomasDisponibles.put(48, "pt-BR");
+        idiomasDisponibles.put(49, "pt-PT");
+        idiomasDisponibles.put(50, "pa");
+        idiomasDisponibles.put(51, "ro");
+        idiomasDisponibles.put(52, "ru");
+        idiomasDisponibles.put(53, "sr");
+        idiomasDisponibles.put(54, "si");
+        idiomasDisponibles.put(55, "sk");
+        idiomasDisponibles.put(56, "es");
+        idiomasDisponibles.put(57, "su");
+        idiomasDisponibles.put(58, "sw");
+        idiomasDisponibles.put(59, "sv");
+        idiomasDisponibles.put(60, "ta");
+        idiomasDisponibles.put(61, "te");
+        idiomasDisponibles.put(62, "th");
+        idiomasDisponibles.put(63, "tr");
+        idiomasDisponibles.put(64, "uk");
+        idiomasDisponibles.put(65, "ur");
+        idiomasDisponibles.put(66, "vi");
+        idiomasDisponibles.put(67, "cy");
+
+        System.out.println();
+        System.out.println(" -- IDIOMAS DISPONIBLES -- ");
+        System.out.println();
+
+        int contador = 1;
+
+        for (Map.Entry<String, String> entry : idiomasAcortaciones.entrySet()) {
+            pw.println(entry.getKey() + " => " + contador);
+            pw.flush();
+            contador++;
+        }
+
+        System.out.println();
+        System.out.println(" -- -- ");
+        System.out.println();
+    }
 }
