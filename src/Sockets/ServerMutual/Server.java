@@ -63,20 +63,21 @@ public class Server implements Runnable {
             }
 
             while (true) {
+                System.out.println("Esperando a cliente");
                 client = server.accept();
                 System.out.println("SERVER: Connection established!");
 
+                pw = new PrintWriter(client.getOutputStream());
+                printPossibleLanguages(pw);
+
                 isr = new InputStreamReader(client.getInputStream());
                 reader = new BufferedReader(isr);
-                pw = new PrintWriter(client.getOutputStream(), true);
 
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-
-                printPossibleLanguages(pw);
 
                 String all = reader.readLine();
                 System.out.println(all);
@@ -107,6 +108,7 @@ public class Server implements Runnable {
                     System.out.println("SERVER: Message received: " + clientMessage);
                     String translatedMessage = getAnswer(clientMessage, clientLanguage);
                     pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
+                    pw.println("transReceived");
                     System.out.println("SERVER: Message sent.");
                 } else {
                     System.out.println("ERROR: No message received from client OR language received not found.");
@@ -196,7 +198,8 @@ public class Server implements Runnable {
         return idiomasAcortaciones;
     }
 
-    public void printPossibleLanguages(PrintWriter pw) {
+    public void
+    printPossibleLanguages(PrintWriter pw) {
         idiomasDisponibles.put(1, "af");
         idiomasDisponibles.put(2, "sq");
         idiomasDisponibles.put(3, "am");
@@ -265,20 +268,18 @@ public class Server implements Runnable {
         idiomasDisponibles.put(66, "vi");
         idiomasDisponibles.put(67, "cy");
 
-        System.out.println();
-        System.out.println(" -- IDIOMAS DISPONIBLES -- ");
-        System.out.println();
-
         int contador = 1;
 
         for (Map.Entry<String, String> entry : idiomasAcortaciones.entrySet()) {
             pw.println(entry.getKey() + " => " + contador);
-            pw.flush();
             contador++;
         }
 
-        System.out.println();
-        System.out.println(" -- -- ");
-        System.out.println();
+        System.out.println("Fin del bucle");
+
+        pw.println("optionsReceived");
+
+        pw.flush();
+
     }
 }

@@ -29,7 +29,7 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        Sockets.ServerMutual.Client c = new Client(host, port);
+        /*Sockets.ServerMutual.Client c = new Client(host, port);
         if (!c.connect()) {
             System.out.println("ERROR: Can't connect to the server.");
             return;
@@ -39,7 +39,7 @@ public class Main {
 
         String ans = c.receive();
 
-        System.out.println(ans);
+        System.out.println(ans);*/
 
     }
 
