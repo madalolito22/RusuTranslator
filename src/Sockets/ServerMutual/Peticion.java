@@ -82,45 +82,27 @@ public class Peticion implements Runnable {
                 if (!charnow.equals('~') && gettingMessage) {
                     clientMessage += charnow.toString();
                 } else if (gettingLng) {
-                    try{
-                        clientLanguageNum = Integer.valueOf(clientLanguageNum.toString().concat(String.valueOf(Integer.parseInt(charnow.toString()))));
-                    }catch (NumberFormatException e){
-                        clientLanguageNum = Integer.valueOf(clientLanguageNum.toString().concat("1"));
-                    }
-                    try {
-                        if (clientLanguage == null) {
-                            clientLanguage = "er";
-                        } else {
-                            clientLanguage = idiomasDisponibles.get(clientLanguageNum);
+                    if (Character.isDigit(charnow)) {
+                        if (clientLanguageNum.toString().length() < 2) {
+                            clientLanguageNum = Integer.valueOf(clientLanguageNum + charnow.toString());
+                            System.out.println(clientLanguageNum);
                         }
-                    } catch (Exception e) {
-                        System.out.println("El cliente es bobo");
-                        pw.flush();
-                        pw.println("Idioma proporcionado no correcto... Cerrando conexión");
-                        socket.close();
                     }
-                    System.out.println(clientLanguageNum);
-                    System.out.println(clientLanguage);
-                    System.out.println(clientMessage);
-
-                    if ((clientMessage.length() + clientLanguage.length()) - 1 == all.length() && idiomasDisponibles.containsKey(clientLanguageNum)) {
-                        gettingLng = false;
-                        break;
-                    } else {
-                        gettingLng = false;
-                        System.out.println("Errorete");
-                        break;
-                    }
-
                 } else if (charnow.equals('~')) {
                     gettingMessage = false;
                     gettingLng = true;
                 }
             }
 
-            if(clientLanguage.equals("er")){
-                pw.println("Idioma no correcto, cerrando conexión...");
-            }else if (clientMessage != null && clientLanguage != null && idiomasDisponibles.containsKey(clientLanguageNum)) {
+            clientLanguage = idiomasDisponibles.get(clientLanguageNum);
+
+            if (clientLanguage == null) {
+                clientLanguage = idiomasDisponibles.get(Integer.parseInt(String.valueOf(clientLanguageNum.toString().charAt(0))));
+            }
+
+            System.out.println(clientLanguage);
+
+            if (clientMessage != null) {
                 System.out.println("SERVER: Message received: " + clientMessage);
                 String translatedMessage = getAnswer(clientMessage, clientLanguage);
                 pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
