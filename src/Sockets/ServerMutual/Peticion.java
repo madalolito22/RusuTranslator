@@ -5,18 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
 
 import static Sockets.ServerMutual.Funcionalidades.*;
 
 public class Peticion implements Runnable {
-
-    private final String originT = "";
-    private final String targetT = "";
-    int port = 0;
-    Scanner sc = new Scanner(System.in);
-    ArrayList<String> sends;
 
     InputStreamReader isr = null;
     BufferedReader reader = null;
