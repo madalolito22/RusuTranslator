@@ -24,7 +24,7 @@ public class Server implements Runnable {
     public void run() {
         try {
 
-            System.out.println("INFO: Server launching...");
+            System.out.println("INFO: SERVER LAUNCHING...");
             try {
                 server = new ServerSocket(port);
             } catch (IOException e) {
@@ -34,9 +34,9 @@ public class Server implements Runnable {
 
             while (true) {
 
-                System.out.println("Esperando a cliente");
+                System.out.println("INFO: WAITING FOR CLIENT");
                 Socket conexion = server.accept();
-                System.out.println("SERVER: Connection established!");
+                System.out.println("SERVER: CONNECTED!");
                 Peticion p = new Peticion(conexion);
                 Thread hilo = new Thread(p);
                 hilo.start();
