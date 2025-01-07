@@ -26,6 +26,7 @@ public class Peticion implements Runnable {
     Integer clientLanguageNum = 0;
     LinkedHashMap<Integer, String> idiomasDisponibles = new LinkedHashMap<>();
     LinkedHashMap<String, String> idiomasAcortaciones = new LinkedHashMap<>();
+    LinkedHashMap<Character, String> morseCode = new LinkedHashMap<>();
     boolean gettingMessage = true;
     boolean gettingLng = false;
 
@@ -33,6 +34,10 @@ public class Peticion implements Runnable {
     BufferedReader reader = null;
     PrintWriter pw = null;
     Socket socket;
+
+    public Peticion(Socket socket) {
+        this.socket = socket;
+    }
 
     private static String translate(String langFrom, String langTo, String text) throws IOException {
         String urlStr = "https://script.google.com/macros/s/AKfycbxq5SL1XmfVK05ph1l4uu9u4LXQeCno5fmNdpval10rraJ-YJOsSeSzl9HzRJGlI_gp/exec" + "?q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) + "&target=" + langTo + "&source=" + langFrom;
@@ -47,10 +52,6 @@ public class Peticion implements Runnable {
         }
         in.close();
         return response.toString();
-    }
-
-    public Peticion(Socket socket) {
-        this.socket = socket;
     }
 
     @Override
@@ -81,6 +82,9 @@ public class Peticion implements Runnable {
 
                 if (!charnow.equals('~') && gettingMessage) {
                     clientMessage += charnow.toString();
+                } else if (charnow.equals('~')) {
+                    gettingMessage = false;
+                    gettingLng = true;
                 } else if (gettingLng) {
                     if (Character.isDigit(charnow)) {
                         if (clientLanguageNum.toString().length() < 2) {
@@ -88,43 +92,53 @@ public class Peticion implements Runnable {
                             System.out.println(clientLanguageNum);
                         }
                     }
-                } else if (charnow.equals('~')) {
-                    gettingMessage = false;
-                    gettingLng = true;
                 }
+
+                if (clientLanguageNum == 68) {
+
+                    doMorse(clientMessage);
+
+                } else if (clientLanguage == null) {
+
+                    clientLanguage = idiomasDisponibles.get(Integer.parseInt(String.valueOf(clientLanguageNum.toString().charAt(0))));
+
+                    System.out.println(clientLanguage);
+
+                    if (clientMessage != null) {
+                        System.out.println("SERVER: Message received: " + clientMessage);
+                        String translatedMessage = getAnswer(clientMessage, clientLanguage);
+                        pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
+                        pw.println("transReceived");
+                        System.out.println("SERVER: Message sent.");
+                    } else {
+                        System.out.println("ERROR: No message received from client OR language received not found.");
+                    }
+
+                }
+
+                reader.close();
+                isr.close();
+                socket.close();
+
             }
 
-            clientLanguage = idiomasDisponibles.get(clientLanguageNum);
-
-            if (clientLanguage == null) {
-                clientLanguage = idiomasDisponibles.get(Integer.parseInt(String.valueOf(clientLanguageNum.toString().charAt(0))));
-            }
-
-            System.out.println(clientLanguage);
-
-            if (clientMessage != null) {
-                System.out.println("SERVER: Message received: " + clientMessage);
-                String translatedMessage = getAnswer(clientMessage, clientLanguage);
-                pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
-                pw.println("transReceived");
-                System.out.println("SERVER: Message sent.");
-            } else {
-                System.out.println("ERROR: No message received from client OR language received not found.");
-            }
-
-            reader.close();
-            isr.close();
-            socket.close();
-
-        } catch (
-                IOException e) {
-            System.out.println("ERROR: Failed connecting to client.");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
     }
 
     private String getAnswer(String message, String destination) throws IOException {
         return translate("", destination, message);
+    }
+
+    private void doMorse(String clientMessage) {
+        for(int i = 0; i < clientMessage.length() - 1; i++ ){
+            String currentMorse =  morseCode.get(clientMessage.charAt(i));
+            String clientMessageMorse = "";
+            clientMessageMorse += clientMessageMorse.concat(currentMorse + " ") ;
+            pw.println("Tu mensaje en morse es: " + clientMessageMorse);
+            System.out.println(clientMessageMorse);
+        }
     }
 
     public void printPossibleLanguages(PrintWriter pw) {
@@ -283,5 +297,38 @@ public class Peticion implements Runnable {
         return idiomasAcortaciones;
     }
 
+    private void startMorseHashmap(){
+        morseCode.put('A', "·-");
+        morseCode.put('B', "·-");
+        morseCode.put('C', "·-");
+        morseCode.put('D', "·-");
+        morseCode.put('E', "·-");
+        morseCode.put('F', "·-");
+        morseCode.put('G', "·-");
+        morseCode.put('H', "·-");
+        morseCode.put('I', "·-");
+        morseCode.put('J', "·-");
+        morseCode.put('K', "·-");
+        morseCode.put('L', "·-");
+        morseCode.put('M', "·-");
+        morseCode.put('N', "·-");
+        morseCode.put('O', "·-");
+        morseCode.put('P', "·-");
+        morseCode.put('Q', "·-");
+        morseCode.put('R', "·-");
+        morseCode.put('S', "·-");
+        morseCode.put('T', "·-");
+        morseCode.put('U', "·-");
+        morseCode.put('V', "·-");
+        morseCode.put('W', "·-");
+        morseCode.put('X', "·-");
+        morseCode.put('Y', "·-");
+        morseCode.put('Z', "·-");
+    }
+
+
+
 }
+
+
 
