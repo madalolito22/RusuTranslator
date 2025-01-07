@@ -2,7 +2,7 @@ package Sockets.ServerMutual;
 
 public class Main {
 
-    private static final int port = 1337;
+    private static final int port = 1347;
     static Sockets.ServerMutual.Server server = new Server(port);
 
     public static void main(String[] args) {

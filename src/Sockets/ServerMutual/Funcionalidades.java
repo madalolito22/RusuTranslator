@@ -37,6 +37,9 @@ public class Funcionalidades {
     */
     static Integer doSplit(String clientRawMessage) {
         //Hacemos algoritmo de separación (Sucio)
+
+        clientLanguageNum = 0;
+
         for (int i = 0; i < clientRawMessage.length(); i++) {
             Character charnow = clientRawMessage.charAt(i);
 
@@ -49,6 +52,8 @@ public class Funcionalidades {
                 if (Character.isDigit(charnow)) {
                     if (clientLanguageNum.toString().length() < 2) {
                         clientLanguageNum = Integer.valueOf(clientLanguageNum + charnow.toString());
+                    } else {
+                        gettingLng = false;
                     }
                 }
             }
