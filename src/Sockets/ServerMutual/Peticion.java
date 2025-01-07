@@ -60,6 +60,7 @@ public class Peticion implements Runnable {
         try {
 
             hashmapIdiomas();
+            startMorseHashmap();
 
             pw = new PrintWriter(socket.getOutputStream(), true);
 
@@ -93,34 +94,39 @@ public class Peticion implements Runnable {
                         }
                     }
                 }
+            }
 
-                if (clientLanguageNum == 68) {
+            System.out.println(clientLanguageNum);
 
-                    doMorse(clientMessage);
+            if (clientLanguageNum == 68) {
 
-                } else if (clientLanguage == null) {
+                System.out.println("Es 68!");
+                doMorse(clientMessage);
 
-                    clientLanguage = idiomasDisponibles.get(Integer.parseInt(String.valueOf(clientLanguageNum.toString().charAt(0))));
 
-                    System.out.println(clientLanguage);
+            } else if (clientLanguage == null) {
 
-                    if (clientMessage != null) {
-                        System.out.println("SERVER: Message received: " + clientMessage);
-                        String translatedMessage = getAnswer(clientMessage, clientLanguage);
-                        pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
-                        pw.println("transReceived");
-                        System.out.println("SERVER: Message sent.");
-                    } else {
-                        System.out.println("ERROR: No message received from client OR language received not found.");
-                    }
+                clientLanguage = idiomasDisponibles.get(Integer.parseInt(String.valueOf(clientLanguageNum.toString().charAt(0))));
 
+                System.out.println(clientLanguage);
+
+                if (clientMessage != null) {
+                    System.out.println("SERVER: Message received: " + clientMessage);
+                    String translatedMessage = getAnswer(clientMessage, clientLanguage);
+                    pw.println("Translated message: (" + clientLanguage.toUpperCase() + ") " + translatedMessage);
+                    pw.println("transReceived");
+                    System.out.println("SERVER: Message sent.");
+                } else {
+                    System.out.println("ERROR: No message received from client OR language received not found.");
                 }
 
-                reader.close();
-                isr.close();
-                socket.close();
-
             }
+
+
+            reader.close();
+            isr.close();
+            socket.close();
+
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -132,13 +138,19 @@ public class Peticion implements Runnable {
     }
 
     private void doMorse(String clientMessage) {
-        for(int i = 0; i < clientMessage.length() - 1; i++ ){
-            String currentMorse =  morseCode.get(clientMessage.charAt(i));
-            String clientMessageMorse = "";
-            clientMessageMorse += clientMessageMorse.concat(currentMorse + " ") ;
-            pw.println("Tu mensaje en morse es: " + clientMessageMorse);
-            System.out.println(clientMessageMorse);
+        String clientMessageMorse = "";
+        System.out.println(clientMessage + " a traducir");
+        for (int i = 0; i < clientMessage.length(); i++) {
+            if(clientMessage.charAt(i) != ' ' && Character.isLetter(clientMessage.charAt(i))) {
+                System.out.println(Character.toUpperCase(clientMessage.charAt(i)));
+                String currentMorse = morseCode.get(Character.toUpperCase(clientMessage.charAt(i)));
+                System.out.println(currentMorse);
+                clientMessageMorse += currentMorse + " ";
+                System.out.println(clientMessageMorse);
+            }
         }
+        pw.println("Tu mensaje en morse es: " + clientMessageMorse);
+        pw.println("transReceived");
     }
 
     public void printPossibleLanguages(PrintWriter pw) {
@@ -220,6 +232,8 @@ public class Peticion implements Runnable {
 
         System.out.println("Fin del bucle");
 
+        pw.println("Morse => 68 ");
+
         pw.println("optionsReceived");
 
         pw.flush();
@@ -297,35 +311,34 @@ public class Peticion implements Runnable {
         return idiomasAcortaciones;
     }
 
-    private void startMorseHashmap(){
+    private void startMorseHashmap() {
         morseCode.put('A', "·-");
-        morseCode.put('B', "·-");
-        morseCode.put('C', "·-");
-        morseCode.put('D', "·-");
-        morseCode.put('E', "·-");
-        morseCode.put('F', "·-");
-        morseCode.put('G', "·-");
-        morseCode.put('H', "·-");
-        morseCode.put('I', "·-");
-        morseCode.put('J', "·-");
-        morseCode.put('K', "·-");
-        morseCode.put('L', "·-");
-        morseCode.put('M', "·-");
-        morseCode.put('N', "·-");
-        morseCode.put('O', "·-");
-        morseCode.put('P', "·-");
-        morseCode.put('Q', "·-");
-        morseCode.put('R', "·-");
-        morseCode.put('S', "·-");
-        morseCode.put('T', "·-");
-        morseCode.put('U', "·-");
-        morseCode.put('V', "·-");
-        morseCode.put('W', "·-");
-        morseCode.put('X', "·-");
-        morseCode.put('Y', "·-");
-        morseCode.put('Z', "·-");
+        morseCode.put('B', "-···");
+        morseCode.put('C', "-·-·");
+        morseCode.put('D', "-··");
+        morseCode.put('E', "·");
+        morseCode.put('F', "··-·");
+        morseCode.put('G', "--·");
+        morseCode.put('H', "····");
+        morseCode.put('I', "··");
+        morseCode.put('J', "·---");
+        morseCode.put('K', "-·-");
+        morseCode.put('L', "·-··");
+        morseCode.put('M', "--");
+        morseCode.put('N', "-·");
+        morseCode.put('O', "---");
+        morseCode.put('P', "·--·");
+        morseCode.put('Q', "--·-");
+        morseCode.put('R', "·-·");
+        morseCode.put('S', "···");
+        morseCode.put('T', "-");
+        morseCode.put('U', "··-");
+        morseCode.put('V', "···-");
+        morseCode.put('W', "·--");
+        morseCode.put('X', "-··-");
+        morseCode.put('Y', "-·--");
+        morseCode.put('Z', "--··");
     }
-
 
 
 }
