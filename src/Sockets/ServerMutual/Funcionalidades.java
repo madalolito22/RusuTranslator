@@ -39,11 +39,11 @@ public class Funcionalidades {
         //Hacemos algoritmo de separación (Sucio)
 
         clientLanguageNum = 0;
+        clientMessage = "";
+        gettingMessage = true;
 
         for (int i = 0; i < clientRawMessage.length(); i++) {
             Character charnow = clientRawMessage.charAt(i);
-
-            clientMessage = "";
 
             if (!charnow.equals('~') && gettingMessage) {
                 clientMessage += charnow.toString();
