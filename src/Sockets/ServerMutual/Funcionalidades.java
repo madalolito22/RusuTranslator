@@ -43,6 +43,8 @@ public class Funcionalidades {
         for (int i = 0; i < clientRawMessage.length(); i++) {
             Character charnow = clientRawMessage.charAt(i);
 
+            clientMessage = "";
+
             if (!charnow.equals('~') && gettingMessage) {
                 clientMessage += charnow.toString();
             } else if (charnow.equals('~')) {
